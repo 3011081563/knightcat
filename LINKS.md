@@ -18,6 +18,8 @@
 | 代币页 | https://bscscan.com/token/0x578ec6134640efe429e8a2bfcdc13271b08d618b |
 | 部署交易 | https://bscscan.com/tx/0xde708446f17a27d2bcb5dff83dcd981ca0203b37f679048a50414d1b5b4ecf4c |
 | 持币钱包 | `0x2c61A51eC32fA03aa80010ab32C2F727B08E4976` |
+| **空投合约** | `0x94FAcF90232C162935331B3235146e38CB7A428A` |
+| 空投领取页 | https://3011081563.github.io/knightcat/airdrop.html |
 
 ## 三、GitHub（源头，随时能重新拿地址）
 
