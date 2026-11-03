@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Knight Cat ($KNIGHTCAT) — 披甲的猫，守你的仓</title>
+<meta name="description" content="KNIGHTCAT — BNB Smart Chain 上的社区代币。零后门、无增发、随时可卖。" />
+<meta property="og:title" content="Knight Cat ($KNIGHTCAT)" />
+<meta property="og:description" content="Knights don't panic sell. 披甲的猫，守你的仓。" />
+<meta property="og:image" content="./knightcat-512.png" />
+<link rel="icon" href="./knightcat-32.png" />
+<style>
+  :root{
+    --navy:#0a1633; --navy2:#0f2250; --gold:#e9c46a; --gold2:#f6d98a;
+    --pink:#f4a7bb; --ink:#eaf0ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI",Roboto,sans-serif;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #1b3170 0%, transparent 60%),
+      linear-gradient(180deg,#0a1633 0%, #060d20 100%);
+    color:var(--ink); min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; padding:48px 20px 80px; overflow-x:hidden;
+  }
+  .glow{position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(600px 400px at 80% 20%, rgba(233,196,106,.10), transparent 70%),
+               radial-gradient(500px 350px at 10% 70%, rgba(244,167,187,.10), transparent 70%);}
+  header{display:flex;align-items:center;gap:18px;margin-bottom:26px;z-index:1}
+  .logo{width:96px;height:96px;border-radius:50%;box-shadow:0 0 0 4px rgba(233,196,106,.35), 0 12px 40px rgba(0,0,0,.5)}
+  h1{font-size:clamp(30px,6vw,52px);letter-spacing:2px;
+     background:linear-gradient(180deg,#fff4cf,#e9c46a 60%,#b8892f);
+     -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  .tag{color:#9fb0d8;font-size:15px;margin-top:6px;letter-spacing:.5px}
+  .card{
+    z-index:1;width:min(760px,100%);margin-top:26px;padding:26px 24px;border-radius:22px;
+    background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+    border:1px solid rgba(233,196,106,.28);
+    box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .label{font-size:12px;letter-spacing:2px;color:#8fa2cc;text-transform:uppercase}
+  .addr{
+    display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;
+  }
+  code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;
+    background:#050b1c;border:1px solid #223058;border-radius:12px;padding:12px 14px;
+    color:#c9d8ff;word-break:break-all;flex:1;min-width:240px;
+  }
+  button{
+    cursor:pointer;font:inherit;font-weight:600;border-radius:12px;border:0;padding:12px 18px;
+    background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1d00;
+    transition:transform .15s ease, filter .15s ease;
+  }
+  button:hover{transform:translateY(-1px);filter:brightness(1.05)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+  a.btn{
+    flex:1;min-width:150px;text-align:center;text-decoration:none;font-weight:700;
+    padding:14px 18px;border-radius:14px;border:1px solid rgba(233,196,106,.5);
+    color:#ffe9b3;background:rgba(233,196,106,.08);transition:.15s;
+  }
+  a.btn:hover{background:rgba(233,196,106,.18);transform:translateY(-1px)}
+  a.btn.primary{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1d00;border-color:transparent}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
+  .stat{background:rgba(255,255,255,.04);border:1px solid #1d2a4d;border-radius:14px;padding:14px}
+  .stat b{display:block;font-size:17px;margin-bottom:4px;color:#fff3d0}
+  .stat span{font-size:12px;color:#8fa2cc}
+  footer{margin-top:36px;color:#6b7ba5;font-size:12px;text-align:center;line-height:1.8;z-index:1;max-width:700px}
+  .knight{position:fixed;right:-40px;bottom:-40px;width:280px;opacity:.05;transform:rotate(-12deg);pointer-events:none}
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+
+  <header>
+    <img class="logo" src="./knightcat-512.png" alt="Knight Cat logo" />
+    <div>
+      <h1>KNIGHTCAT</h1>
+      <div class="tag">Knights don't panic sell. · BNB Smart Chain</div>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="label">Contract Address</div>
+    <div class="addr">
+      <code id="ca">0x0000000000000000000000000000000000000000</code>
+      <button id="copy">复制</button>
+    </div>
+
+    <div class="grid">
+      <div class="stat"><b>1,000,000,000</b><span>固定总量</span></div>
+      <div class="stat"><b>0 / 0</b><span>买卖税</span></div>
+      <div class="stat"><b>No Owner</b><span>无后门·不可增发</span></div>
+      <div class="stat"><b>Immutable</b><span>部署即定稿</span></div>
+    </div>
+
+    <div class="row">
+      <a class="btn primary" id="buy" target="_blank" rel="noopener">在 PancakeSwap 买入</a>
+      <a class="btn" id="chart" target="_blank" rel="noopener">看 K 线</a>
+      <a class="btn" id="scan" target="_blank" rel="noopener">BscScan</a>
+    </div>
+
+    <div class="row">
+      <a class="btn" id="tg" href="#" target="_blank" rel="noopener">Telegram</a>
+      <a class="btn" id="x" href="#" target="_blank" rel="noopener">X / Twitter</a>
+    </div>
+  </section>
+
+  <footer>
+    本页面不构成投资建议。加密资产价格波动极大，可能归零，请自行判断风险。<br />
+    合约无 owner、无增发、无黑名单：源码已开源验证，任何人可审。
+  </footer>
+
+  <img class="knight" src="./knightcat-512.png" alt="" />
+
+<script>
+  const CONTRACT = "0x578ec6134640efe429e8a2bfcdc13271b08d618b";
+  // 部署完成后填社媒链接（没有就留空，脚本会自动隐藏按钮）
+  const SOCIALS = { tg: "", x: "" };
+
+  const ca = document.getElementById("ca");
+  ca.textContent = CONTRACT;
+
+  document.getElementById("copy").onclick = async (e) => {
+    try {
+      await navigator.clipboard.writeText(CONTRACT);
+      e.target.textContent = "已复制 ✓";
+      setTimeout(() => (e.target.textContent = "复制"), 1500);
+    } catch { alert(CONTRACT); }
+  };
+
+  document.getElementById("buy").href =
+    `https://pancakeswap.finance/swap?outputCurrency=${CONTRACT}`;
+  document.getElementById("chart").href =
+    `https://dexscreener.com/bsc/${CONTRACT}`;
+  document.getElementById("scan").href =
+    `https://bscscan.com/token/${CONTRACT}`;
+
+  if (SOCIALS.tg) document.getElementById("tg").href = SOCIALS.tg;
+  else document.getElementById("tg").style.display = "none";
+  if (SOCIALS.x) document.getElementById("x").href = SOCIALS.x;
+  else document.getElementById("x").style.display = "none";
+</script>
+</body>
+</html>
