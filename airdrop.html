@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KNIGHTCAT 空投领取</title>
+<link rel="icon" href="./knightcat-32.png" />
+<style>
+  :root{--navy:#0a1633;--gold:#e9c46a;--gold2:#f6d98a;--ink:#eaf0ff;--dim:#8fa2cc;--ok:#3ddc97;--err:#ff6b81}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+    background:radial-gradient(1000px 600px at 50% -10%,#1b3170,transparent 60%),linear-gradient(180deg,#0a1633,#060d20);
+    color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:44px 18px 80px}
+  .head{display:flex;align-items:center;gap:16px;margin-bottom:6px}
+  .logo{width:76px;height:76px;border-radius:50%;box-shadow:0 0 0 4px rgba(233,196,106,.35),0 12px 40px rgba(0,0,0,.5)}
+  h1{font-size:clamp(22px,5vw,34px);background:linear-gradient(180deg,#fff4cf,#e9c46a 60%,#b8892f);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tag{color:var(--dim);font-size:13px;margin-top:4px}
+  .panel{width:min(640px,100%);margin-top:24px;padding:24px;border-radius:22px;
+    background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
+    border:1px solid rgba(233,196,106,.28);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px dashed rgba(255,255,255,.08);font-size:14px}
+  .row:last-of-type{border-bottom:0}
+  .k{color:var(--dim)}.v{font-family:ui-monospace,Menlo,monospace;text-align:right;word-break:break-all}
+  button{cursor:pointer;font:inherit;font-weight:700;border:0;border-radius:14px;padding:15px 20px;width:100%;margin-top:18px;
+    background:linear-gradient(180deg,var(--gold2),var(--gold));color:#2a1d00;transition:.15s}
+  button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.05)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.ghost{background:rgba(233,196,106,.1);color:#ffe9b3;border:1px solid rgba(233,196,106,.45)}
+  .log{margin-top:16px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.9;background:#04091a;
+    border:1px solid #18233f;border-radius:12px;padding:14px;color:#9fb0d8;white-space:pre-wrap;min-height:56px}
+  .ok{color:var(--ok)}.err{color:var(--err)}.warn{color:#ffcf6b}
+  footer{margin-top:28px;color:#6b7ba5;font-size:12px;text-align:center;line-height:1.9;max-width:640px}
+  a{color:#ffe9b3}
+</style>
+</head>
+<body>
+  <div class="head">
+    <img class="logo" src="./knightcat-512.png" alt="logo" />
+    <div>
+      <h1>KNIGHTCAT 空投领取</h1>
+      <div class="tag">Merkle 白名单空投 · 每人只能领一次 · gas 由领取者自付</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="row"><span class="k">你的钱包</span><span class="v" id="addr">未连接</span></div>
+    <div class="row"><span class="k">白名单资格</span><span class="v" id="status">—</span></div>
+    <div class="row"><span class="k">可领取数量</span><span class="v" id="amount">—</span></div>
+    <div class="row"><span class="k">剩余额度</span><span class="v" id="left">—</span></div>
+
+    <button id="connect" class="ghost">① 连接钱包</button>
+    <button id="claim" disabled>② 领取空投</button>
+
+    <div class="log" id="log">正在加载白名单…</div>
+  </div>
+
+  <footer>
+    Merkle Root: <span id="root" style="font-family:monospace">—</span><br />
+    合约地址：<span id="ca" style="font-family:monospace">未部署</span><br />
+    领取需要 BNB 付 gas（约 $0.01）。本页面不托管你的私钥，所有签名在钱包内完成。
+  </footer>
+
+<script src="./ethers.umd.min.js"></script>
+<script>
+// ⬇⬇ 部署空投合约后，把地址填在这里
+const AIRDROP = "0x0000000000000000000000000000000000000000";
+const TOKEN = "0x578ec6134640efe429e8a2bfcdc13271b08d618b";
+const CHAIN_ID = 56;
+
+const ABI = [
+  "function claim(uint256 index, address account, uint256 amount, bytes32[] proof)",
+  "function claimed(uint256) view returns (bool)",
+  "function remaining() view returns (uint256)",
+  "function merkleRoot() view returns (bytes32)",
+  "function deadline() view returns (uint256)",
+];
+
+const $ = (id) => document.getElementById(id);
+let provider, signer, account, claims = null;
+
+function log(msg, cls = "") {
+  const d = document.createElement("div");
+  if (cls) d.className = cls;
+  d.textContent = msg;
+  $("log").appendChild(d);
+  $("log").scrollTop = $("log").scrollHeight;
+}
+
+async function loadClaims() {
+  try {
+    const r = await fetch("./claims.json", { cache: "no-store" });
+    claims = await r.json();
+    const n = Object.keys(claims).length;
+    log(`✅ 白名单已加载：${n} 个地址`, "ok");
+  } catch (e) {
+    log("⚠️ 白名单文件还没上传（claims.json）", "warn");
+    claims = {};
+  }
+}
+
+$("connect").onclick = async () => {
+  if (!window.ethereum) { log("❌ 没检测到钱包插件", "err"); return; }
+  try {
+    const accs = await window.ethereum.request({ method: "eth_requestAccounts" });
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    account = accs[0];
+    $("addr").textContent = account;
+
+    const net = await provider.getNetwork();
+    if (Number(net.chainId) !== CHAIN_ID) {
+      try {
+        await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x38" }] });
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+      } catch { log("⚠️ 请手动切到 BNB Smart Chain", "warn"); }
+    }
+
+    const c = claims && claims[account.toLowerCase()];
+    if (c) {
+      $("status").textContent = "✅ 在名单内";
+      $("status").className = "v ok";
+      $("amount").textContent = ethers.formatUnits(c.amount, 18) + " KNIGHTCAT";
+      $("claim").disabled = false;
+    } else {
+      $("status").textContent = "❌ 不在名单";
+      $("status").className = "v err";
+      $("amount").textContent = "—";
+    }
+
+    if (AIRDROP !== "0x0000000000000000000000000000000000000000") {
+      const airdrop = new ethers.Contract(AIRDROP, ABI, provider);
+      const left = await airdrop.remaining();
+      $("left").textContent = ethers.formatUnits(left, 18) + " 枚";
+      $("root").textContent = await airdrop.merkleRoot();
+      $("ca").textContent = AIRDROP;
+    } else {
+      log("⚠️ 空投合约还没部署，先把 AIRDROP 常量填上", "warn");
+    }
+  } catch (e) {
+    log("❌ 连接失败：" + (e.message || e), "err");
+  }
+};
+
+$("claim").onclick = async () => {
+  const c = claims[account.toLowerCase()];
+  if (!c) return;
+  $("claim").disabled = true;
+  try {
+    log("① 正在发送领取交易，请在钱包里确认…");
+    const airdrop = new ethers.Contract(AIRDROP, ABI, signer);
+    const tx = await airdrop.claim(c.index, account, c.amount, c.proof);
+    log("② 已广播：" + tx.hash);
+    await tx.wait();
+    log("✅ 领取成功，代币已到账", "ok");
+  } catch (e) {
+    const m = (e.shortMessage || e.message || "").toString();
+    log("❌ 失败：" + m, "err");
+    if (/already claimed/i.test(m)) log("（这个地址已经领过了）", "warn");
+    if (/invalid proof/i.test(m)) log("（不在白名单或数据不匹配）", "warn");
+    $("claim").disabled = false;
+  }
+};
+
+loadClaims();
+</script>
+</body>
+</html>
